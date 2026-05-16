@@ -1,23 +1,43 @@
 from moviepy.editor import *
 
-def create_video(script):
+def create_video():
 
     # Load audio
     audio = AudioFileClip("audio/output.mp3")
 
-    # Load background image
-    image = ImageClip("assets/bg.jpg")
+    # Scene files
+    scene_files = [
+        "scenes/scene1.png",
+        "scenes/scene2.png",
+        "scenes/scene3.png",
+        "scenes/scene4.png"
+    ]
 
-    # Match duration with audio
-    image = image.set_duration(audio.duration)
+    # Duration per scene
+    duration_per_scene = audio.duration / len(scene_files)
+
+    clips = []
+
+    for scene in scene_files:
+
+        clip = ImageClip(scene)
+
+        clip = clip.set_duration(duration_per_scene)
+
+        clips.append(clip)
+
+    # Combine scenes
+    video = concatenate_videoclips(
+        clips,
+        method="compose"
+    )
 
     # Add audio
-    video = image.set_audio(audio)
+    video = video.set_audio(audio)
 
-    # Output path
+    # Export
     output_path = "videos/final_video.mp4"
 
-    # Export video
     video.write_videofile(
         output_path,
         fps=24
