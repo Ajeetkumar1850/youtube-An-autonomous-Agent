@@ -4,8 +4,13 @@ from agents.video_agent import create_video
 from agents.research_agent import research_topics
 from agents.script_agent import generate_script
 from agents.voice_agent import generate_voice
+from agents.scene_agent import generate_scene_prompts
+from agents.seo_agent import generate_seo
 
-# User Input
+# =========================
+# USER INPUT
+# =========================
+
 niche = input("Enter niche: ")
 
 # =========================
@@ -44,19 +49,25 @@ with open("youtube_script.txt", "w", encoding="utf-8") as file:
     file.write(script)
 
 # =========================
+# GENERATE SCENE PROMPTS
+# =========================
+
+print("\nGenerating Scene Prompts...\n")
+
+scene_text = generate_scene_prompts(script)
+
+print(scene_text)
+
+# Convert AI response into list
+scene_prompts = scene_text.split("\n")
+
+# =========================
 # GENERATE SCENE IMAGES
 # =========================
 
 print("\nGenerating Scene Images...\n")
 
-scene_prompts = [
-    "cute cartoon dog playing in park, animated style",
-    "cartoon dog sleeping on sofa, cinematic lighting",
-    "cartoon dog running in garden, vibrant colors",
-    "cute emotional cartoon dog with owner"
-]
-
-for i, prompt in enumerate(scene_prompts):
+for i, prompt in enumerate(scene_prompts[:4]):
 
     filename = f"scene{i+1}.png"
 
@@ -81,6 +92,20 @@ print("\nCreating Video...\n")
 video_path = create_video()
 
 print(f"\nVideo saved at: {video_path}")
+
+# =========================
+# GENERATE SEO
+# =========================
+
+print("\nGenerating SEO Metadata...\n")
+
+seo_data = generate_seo(first_topic, script)
+
+print(seo_data)
+
+# Save SEO
+with open("seo.txt", "w", encoding="utf-8") as file:
+    file.write(seo_data)
 
 # =========================
 # UPLOAD VIDEO
