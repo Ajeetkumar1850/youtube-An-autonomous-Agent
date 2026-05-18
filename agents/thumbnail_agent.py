@@ -5,7 +5,7 @@ def generate_thumbnail_prompt(topic, script):
     prompt = f"""
     You are a professional YouTube thumbnail designer.
 
-    Create ONE cinematic thumbnail image prompt.
+    Create ONE short cinematic thumbnail image prompt.
 
     Topic:
     {topic}
@@ -14,15 +14,20 @@ def generate_thumbnail_prompt(topic, script):
     {script}
 
     Rules:
-    - Highly clickable
-    - Emotional
-    - Bright colors
-    - Cartoon animated style
-    - Cinematic lighting
-    - YouTube Shorts style
-    - Short and detailed
+    - highly clickable
+    - emotional expression
+    - bright colors
+    - cartoon animated style
+    - cinematic lighting
+    - short detailed prompt
+    - visually dramatic
 
-    Return ONLY the image prompt.
+    IMPORTANT:
+    - Return ONLY the image prompt
+    - No headings
+    - No explanations
+    - No markdown
+    - No extra text
     """
 
     response = ollama.chat(
@@ -35,4 +40,4 @@ def generate_thumbnail_prompt(topic, script):
         ]
     )
 
-    return response['message']['content']
+    return response['message']['content'].strip()

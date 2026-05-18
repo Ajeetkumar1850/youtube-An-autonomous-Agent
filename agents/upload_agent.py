@@ -6,7 +6,46 @@ SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
 
 def upload_video():
 
-    # Authentication
+    # =========================
+    # READ SEO FILE
+    # =========================
+
+    with open("seo.txt", "r", encoding="utf-8") as file:
+        seo_data = file.read()
+
+    # Default values
+    title = "AI Generated Video"
+    description = "Created using AI"
+    tags = ["AI"]
+
+    # =========================
+    # EXTRACT TITLE
+    # =========================
+
+    if "TITLE:" in seo_data:
+        title = seo_data.split("TITLE:")[1].split("\n")[0].strip()
+
+    # =========================
+    # EXTRACT DESCRIPTION
+    # =========================
+
+    if "DESCRIPTION:" in seo_data:
+        description = seo_data.split("DESCRIPTION:")[1].split("\n")[0].strip()
+
+    # =========================
+    # EXTRACT TAGS
+    # =========================
+
+    if "TAGS:" in seo_data:
+
+        tags_text = seo_data.split("TAGS:")[1].split("\n")[0]
+
+        tags = [tag.strip() for tag in tags_text.split(",")]
+
+    # =========================
+    # AUTHENTICATION
+    # =========================
+
     flow = InstalledAppFlow.from_client_secrets_file(
         "client_secret.json",
         SCOPES
@@ -14,22 +53,31 @@ def upload_video():
 
     credentials = flow.run_local_server(port=0)
 
-    # Build YouTube service
+    # =========================
+    # BUILD YOUTUBE SERVICE
+    # =========================
+
     youtube = build(
         "youtube",
         "v3",
         credentials=credentials
     )
 
-    # Upload request
+    # =========================
+    # VIDEO UPLOAD
+    # =========================
+
     request = youtube.videos().insert(
         part="snippet,status",
+
         body={
             "snippet": {
-                "title": "AI Nature Video",
-                "description": "Created using Agentic AI Automation",
-                "tags": ["AI", "Nature", "Automation"]
+                "title": title,
+                "description": description,
+                "tags": tags,
+                "categoryId": "22"
             },
+
             "status": {
                 "privacyStatus": "private"
             }
@@ -40,8 +88,22 @@ def upload_video():
         )
     )
 
-    # Execute upload
     response = request.execute()
 
-    print("\nUpload Successful!")
-    print("Video ID:", response["id"])
+    video_id = response["id"]
+
+    print("\nVideo Uploaded Successfully!")
+    print("Video ID:", video_id)
+
+    # =========================
+    # THUMBNAIL UPLOAD
+    # =========================
+
+    youtube.thumbnails().set(
+        videoId=video_id,
+        media_body=MediaFileUpload(
+            "scenes/thumbnail.png"
+        )
+    ).execute()
+
+    print("\nThumbnail Uploaded Successfully!")
