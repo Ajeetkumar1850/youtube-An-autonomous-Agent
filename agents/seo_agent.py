@@ -5,7 +5,7 @@ def generate_seo(topic, script):
     prompt = f"""
     You are a professional YouTube SEO expert.
 
-    Based on this topic and script:
+    Generate SEO metadata for this YouTube Shorts video.
 
     Topic:
     {topic}
@@ -13,17 +13,26 @@ def generate_seo(topic, script):
     Script:
     {script}
 
-    Generate:
+    STRICT FORMAT:
 
-    1. Viral YouTube title
-    2. SEO optimized description
-    3. 10 hashtags
-    4. 10 SEO tags
+    TITLE:
+    (one viral clickable title only)
 
-    Keep everything optimized for:
-    - high CTR
-    - YouTube Shorts
-    - discoverability
+    DESCRIPTION:
+    (2 short engaging lines)
+
+    HASHTAGS:
+    (10 hashtags in one line)
+
+    TAGS:
+    (10 comma-separated SEO tags)
+
+    Rules:
+    - No explanations
+    - No extra text
+    - No markdown
+    - No numbering
+    - Keep title short and viral
     """
 
     response = ollama.chat(

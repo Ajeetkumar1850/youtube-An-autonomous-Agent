@@ -6,6 +6,7 @@ from agents.script_agent import generate_script
 from agents.voice_agent import generate_voice
 from agents.scene_agent import generate_scene_prompts
 from agents.seo_agent import generate_seo
+from agents.thumbnail_agent import generate_thumbnail_prompt
 
 # =========================
 # USER INPUT
@@ -106,6 +107,27 @@ print(seo_data)
 # Save SEO
 with open("seo.txt", "w", encoding="utf-8") as file:
     file.write(seo_data)
+
+# =========================
+# GENERATE THUMBNAIL
+# =========================
+
+print("\nGenerating Thumbnail Prompt...\n")
+
+thumbnail_prompt = generate_thumbnail_prompt(
+    first_topic,
+    script
+)
+
+print(thumbnail_prompt)
+
+# Generate Thumbnail Image
+generate_image(
+    thumbnail_prompt,
+    "thumbnail.png"
+)
+
+print("\nThumbnail generated successfully!")
 
 # =========================
 # UPLOAD VIDEO
