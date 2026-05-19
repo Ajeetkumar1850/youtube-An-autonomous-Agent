@@ -95,15 +95,15 @@ def upload_video():
     print("\nVideo Uploaded Successfully!")
     print("Video ID:", video_id)
 
-    # =========================
-    # THUMBNAIL UPLOAD
-    # =========================
+    # # =========================
+    # # THUMBNAIL UPLOAD
+    # # =========================
 
-    youtube.thumbnails().set(
-        videoId=video_id,
-        media_body=MediaFileUpload(
-            "scenes/thumbnail.png"
-        )
-    ).execute()
+    # youtube.thumbnails().set(
+    #     videoId=video_id,
+    #     media_body=MediaFileUpload(
+    #         "scenes/thumbnail.png"
+    #     )
+    # ).execute()
 
-    print("\nThumbnail Uploaded Successfully!")
+    # print("\nThumbnail Uploaded Successfully!")

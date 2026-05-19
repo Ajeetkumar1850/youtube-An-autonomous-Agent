@@ -1,6 +1,7 @@
 import edge_tts
 import asyncio
 import os
+import re
 
 # =====================================
 # VOICE CONFIGURATION
@@ -36,7 +37,8 @@ def generate_voice(script):
     # Create audio folder if missing
     os.makedirs("audio", exist_ok=True)
 
-    output_file = "audio/output.mp3"
+    # WAV output for better compatibility
+    output_file = "audio/output.wav"
 
     # =====================================
     # CLEAN AI GENERATED TEXT
@@ -47,6 +49,9 @@ def generate_voice(script):
     cleaned_script = cleaned_script.replace("_", "")
     cleaned_script = cleaned_script.replace("**", "")
     cleaned_script = cleaned_script.replace("\n", " ")
+
+    # Remove numbers
+    cleaned_script = re.sub(r'\d+', '', cleaned_script)
 
     # Remove extra spaces
     cleaned_script = " ".join(cleaned_script.split())

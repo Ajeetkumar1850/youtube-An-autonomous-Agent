@@ -8,6 +8,8 @@ from agents.scene_agent import generate_scene_prompts
 from agents.seo_agent import generate_seo
 from agents.thumbnail_agent import generate_thumbnail_prompt
 
+import re
+
 # =========================
 # USER INPUT
 # =========================
@@ -59,8 +61,28 @@ scene_text = generate_scene_prompts(script)
 
 print(scene_text)
 
-# Convert AI response into list
-scene_prompts = scene_text.split("\n")
+# =========================================
+# CLEAN SCENE PROMPTS
+# =========================================
+
+scene_prompts = []
+
+for line in scene_text.split("\n"):
+
+    line = line.strip()
+
+    # Remove numbering like 1. 2.
+    line = re.sub(r'^\d+\.\s*', '', line)
+
+    # Skip empty lines
+    if line:
+        scene_prompts.append(line)
+
+# Debug print
+print("\nCLEANED SCENE PROMPTS:\n")
+
+for prompt in scene_prompts:
+    print(prompt)
 
 # =========================
 # GENERATE SCENE IMAGES
@@ -112,22 +134,21 @@ with open("seo.txt", "w", encoding="utf-8") as file:
 # GENERATE THUMBNAIL
 # =========================
 
-print("\nGenerating Thumbnail Prompt...\n")
+# print("\nGenerating Thumbnail Prompt...\n")
 
-thumbnail_prompt = generate_thumbnail_prompt(
-    first_topic,
-    script
-)
+# thumbnail_prompt = generate_thumbnail_prompt(
+#     first_topic,
+#     script
+# )
 
-print(thumbnail_prompt)
+# print(thumbnail_prompt)
 
-# Generate Thumbnail Image
-generate_image(
-    thumbnail_prompt,
-    "thumbnail.png"
-)
+# generate_image(
+#     thumbnail_prompt,
+#     "thumbnail.png"
+# )
 
-print("\nThumbnail generated successfully!")
+# print("\nThumbnail generated successfully!")
 
 # =========================
 # UPLOAD VIDEO

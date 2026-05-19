@@ -3,23 +3,40 @@ import ollama
 def generate_script(topic):
 
     prompt = f"""
-    You are a professional YouTube Shorts script writer.
+    You are a professional Hindi YouTube Shorts storyteller.
 
-    Create a highly engaging 60-second YouTube Shorts script about:
+    Create a SHORT emotional storytelling script in Hindi.
 
+    Topic:
     {topic}
 
-    Requirements:
-    - Strong hook in first 3 seconds
-    - Simple language
-    - Fast paced
-    - Educational + engaging
-    - Add ending call-to-action
+    IMPORTANT RULES:
+    - Write ONLY in Hindi
+    - Make it sound like a real storyteller
+    - Conversational tone
+    - Emotional narration
+    - Cartoon storytelling style
+    - Simple Hindi words
+    - Add curiosity
+    - Add drama
+    - Add emotions
+    - Add natural pauses
 
-    Format:
-    Hook:
-    Main Content:
-    CTA:
+    VERY IMPORTANT:
+    - No numbering
+    - No bullet points
+    - No headings
+    - No markdown
+    - No labels like Hook/CTA
+    - No English
+    - No emojis
+
+    The script should feel like:
+    - animated story narration
+    - kids storytelling
+    - cartoon YouTube Shorts
+
+    Keep script around 45–60 seconds.
     """
 
     response = ollama.chat(
@@ -32,4 +49,4 @@ def generate_script(topic):
         ]
     )
 
-    return response['message']['content']
+    return response['message']['content'].strip()
