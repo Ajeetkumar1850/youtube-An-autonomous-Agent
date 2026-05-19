@@ -57,3 +57,7 @@ videos/
 # OS
 .DS_Store
 Thumbs.db
+venv/
+venv310/
+__pycache__/
+*.pyc
