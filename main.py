@@ -4,11 +4,8 @@ from agents.video_agent import create_video
 from agents.research_agent import research_topics
 from agents.script_agent import generate_script
 from agents.voice_agent import generate_voice
-from agents.scene_agent import generate_scene_prompts
+from agents.shot_agent import generate_shots
 from agents.seo_agent import generate_seo
-from agents.thumbnail_agent import generate_thumbnail_prompt
-
-import re
 
 # =========================
 # USER INPUT
@@ -27,7 +24,6 @@ results = research_topics(niche)
 print("\nTrending Topics:\n")
 print(results)
 
-# Save Topics
 with open("topics.txt", "w", encoding="utf-8") as file:
     file.write(results)
 
@@ -47,54 +43,38 @@ script = generate_script(first_topic)
 
 print(script)
 
-# Save Script
 with open("youtube_script.txt", "w", encoding="utf-8") as file:
     file.write(script)
 
 # =========================
-# GENERATE SCENE PROMPTS
+# GENERATE CINEMATIC SHOTS
 # =========================
 
-print("\nGenerating Scene Prompts...\n")
+print("\nGenerating Cinematic Shots...\n")
 
-scene_text = generate_scene_prompts(script)
+shots = generate_shots(script)
 
-print(scene_text)
+for shot in shots:
 
-# =========================================
-# CLEAN SCENE PROMPTS
-# =========================================
-
-scene_prompts = []
-
-for line in scene_text.split("\n"):
-
-    line = line.strip()
-
-    # Remove numbering like 1. 2.
-    line = re.sub(r'^\d+\.\s*', '', line)
-
-    # Skip empty lines
-    if line:
-        scene_prompts.append(line)
-
-# Debug print
-print("\nCLEANED SCENE PROMPTS:\n")
-
-for prompt in scene_prompts:
-    print(prompt)
+    print(shot)
 
 # =========================
-# GENERATE SCENE IMAGES
+# GENERATE SHOT IMAGES
 # =========================
 
-print("\nGenerating Scene Images...\n")
+print("\nGenerating Shot Images...\n")
 
-for i, prompt in enumerate(scene_prompts[:4]):
+image_files = []
+
+for i, shot in enumerate(shots[:12]):
 
     filename = f"scene{i+1}.png"
 
-    generate_image(prompt, filename)
+    generate_image(shot, filename)
+
+    image_files.append(
+        f"scenes/{filename}"
+    )
 
 # =========================
 # GENERATE VOICE
@@ -107,12 +87,12 @@ audio_path = generate_voice(script)
 print(f"\nVoice saved at: {audio_path}")
 
 # =========================
-# CREATE VIDEO
+# CREATE DYNAMIC VIDEO
 # =========================
 
-print("\nCreating Video...\n")
+print("\nCreating Dynamic Video...\n")
 
-video_path = create_video()
+video_path = create_video(image_files)
 
 print(f"\nVideo saved at: {video_path}")
 
@@ -126,29 +106,8 @@ seo_data = generate_seo(first_topic, script)
 
 print(seo_data)
 
-# Save SEO
 with open("seo.txt", "w", encoding="utf-8") as file:
     file.write(seo_data)
-
-# =========================
-# GENERATE THUMBNAIL
-# =========================
-
-# print("\nGenerating Thumbnail Prompt...\n")
-
-# thumbnail_prompt = generate_thumbnail_prompt(
-#     first_topic,
-#     script
-# )
-
-# print(thumbnail_prompt)
-
-# generate_image(
-#     thumbnail_prompt,
-#     "thumbnail.png"
-# )
-
-# print("\nThumbnail generated successfully!")
 
 # =========================
 # UPLOAD VIDEO
