@@ -1,8 +1,7 @@
 # Sensitive Data
 client_secret.json
-*.env
+.env
 .env.local
-.env.*
 secrets.json
 *.key
 *.pem
@@ -21,6 +20,7 @@ __pycache__/
 *.so
 .Python
 venv/
+venv310/
 env/
 ENV/
 build/
@@ -38,6 +38,8 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+pip-log.txt
+pip-delete-this-directory.txt
 
 # IDE
 .vscode/
@@ -45,19 +47,38 @@ wheels/
 *.swp
 *.swo
 *~
+.history/
 
-# Generated Output Files
+# Generated Output Files (temporary)
 topics.txt
 youtube_script.txt
+seo.txt
 
-# Media Files (generated)
-audio/
-videos/
+# Media Files (generated at runtime)
+audio/*.wav
+audio/*.mp3
+videos/*.mp4
+scenes/*.png
+scenes/*.jpg
+assets/*.jpg
+
+# Keep directory structure but ignore content
+!audio/.gitkeep
+!videos/.gitkeep
+!scenes/.gitkeep
+!assets/.gitkeep
 
 # OS
 .DS_Store
 Thumbs.db
-venv/
-venv310/
-__pycache__/
-*.pyc
+*.log
+
+# Old version (keep for reference but don't track changes)
+agents/
+main.py
+README.md
+
+# Test outputs
+test_*.png
+test_*.mp4
+quick_*.png

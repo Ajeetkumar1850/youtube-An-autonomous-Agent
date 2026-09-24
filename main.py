@@ -66,15 +66,24 @@ print("\nGenerating Shot Images...\n")
 
 image_files = []
 
-for i, shot in enumerate(shots[:12]):
+# Generate 6 images for better performance and faster generation
+num_images = min(6, len(shots))
+
+print(f"Will generate {num_images} images (this may take 2-3 minutes)...\n")
+
+for i, shot in enumerate(shots[:num_images]):
 
     filename = f"scene{i+1}.png"
+    
+    print(f"[{i+1}/{num_images}] Generating {filename}...")
 
     generate_image(shot, filename)
 
     image_files.append(
         f"scenes/{filename}"
     )
+
+print(f"\n✓ Generated {len(image_files)} images successfully!")
 
 # =========================
 # GENERATE VOICE

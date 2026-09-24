@@ -7,34 +7,37 @@ def generate_shots(script):
 
     Read the Hindi story carefully.
 
-    Generate EXACTLY 12 cinematic animated shot prompts.
+    Generate EXACTLY 12 cinematic animated shot prompts with CHARACTER ACTIONS.
 
     IMPORTANT RULES:
-    - One short shot per line
-    - Focus only on visuals
+    - Describe character movements and expressions
+    - Include: mouth movements, hand gestures, eye expressions, body language
     - Cartoon animation style
     - Disney Pixar style
     - Cute expressive characters
     - Emotional storytelling visuals
-    - Camera angles allowed
-    - Keep shots simple and easy for AI image generation
+    - Action-focused descriptions
+    - Keep shots simple
     - Short prompts only
     - No numbering
     - No explanations
     - No markdown
-    - No extra text
 
     GOOD EXAMPLES:
 
-close-up cartoon mother crying in bedroom
+cartoon mother talking with mouth open, hands gesturing emotionally, tears in eyes
 
-little boy standing in rain with umbrella
+little boy walking with arms swinging, looking around curiously, expressive face
 
-mother hugging child emotionally
+mother hugging child tightly, eyes closed, gentle smile, warm expression
 
-wide shot of cartoon family walking together
+cartoon family walking together, waving hands, laughing with open mouths
 
-sad child sitting alone in colorful room
+sad child sitting with head down, wiping tears, shoulders slumped
+
+happy character jumping with arms raised, big smile, excited eyes
+
+character speaking with animated mouth movements, pointing finger, surprised expression
 
     Script:
     {script}
@@ -54,14 +57,42 @@ sad child sitting alone in colorful room
 
     styled_shots = []
 
-    for line in shot_text.split("\\n"):
+    # Split by newlines
+    lines = shot_text.split("\n")
+    
+    for line in lines:
 
         line = line.strip()
+        
+        # Remove numbering if present (1., 2., etc.)
+        if line and len(line) > 3:
+            
+            # Remove leading numbers and dots
+            import re
+            line = re.sub(r'^\d+[\.\)]\s*', '', line)
+            line = re.sub(r'^\*\*?\s*', '', line)  # Remove markdown
+            line = re.sub(r'\*\*?\s*$', '', line)
+            
+            line = line.strip()
 
-        if line:
+            if line:
+                # Enhanced prompt for animation
+                line += ", animated character with movement, disney pixar style, expressive animation, colorful lighting, ultra detailed, smooth motion"
 
-            line += ", disney pixar cartoon style, colorful lighting, ultra detailed"
+                styled_shots.append(line)
 
-            styled_shots.append(line)
+    # Ensure we have at least 8 shots
+    if len(styled_shots) < 8:
+        print(f"Warning: Only {len(styled_shots)} shots generated. Adding default shots...")
+        
+        default_shots = [
+            "cartoon character talking with mouth open, hands gesturing",
+            "character walking with arms swinging, happy expression",
+            "character with surprised face, eyes wide open, hands raised",
+            "character smiling warmly, eyes closed, peaceful expression"
+        ]
+        
+        while len(styled_shots) < 8:
+            styled_shots.append(default_shots[len(styled_shots) % len(default_shots)] + ", animated character with movement, disney pixar style, expressive animation, colorful lighting, ultra detailed, smooth motion")
 
     return styled_shots

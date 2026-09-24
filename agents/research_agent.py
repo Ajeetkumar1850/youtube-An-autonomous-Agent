@@ -1,18 +1,14 @@
 import ollama
-
 def research_topics(niche):
-
     prompt = f"""
             You are a professional YouTube strategist.
             Generate 10 high-CTR YouTube video ideas for the niche: {niche}
-
             Requirements:
             - optimized for shorts
             - emotionally engaging
             - modern trends
             - high click potential
             - beginner audience
-
                  Also include:
                  - estimated virality score out of 10
             """
@@ -25,5 +21,4 @@ def research_topics(niche):
             }
         ]
     )
-
     return response['message']['content']
