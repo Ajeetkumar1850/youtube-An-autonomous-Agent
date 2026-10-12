@@ -1,0 +1,79 @@
+[app]
+name = "YouTube Autonomous Agent V2"
+version = "2.0.0"
+debug = false
+n_threads = 2
+
+[llm]
+provider = "gemini"
+model = "gemini-2.5-flash"
+base_url = "http://localhost:11434"
+temperature = 0.7
+max_tokens = 2000
+
+# API Keys
+groq_api_key = ""
+gemini_api_key = "AIzaSyBDA-361SOTfoUIf5HGIhc7S4iQQ79QhAI"
+together_api_key = ""
+
+[tts]
+provider = "edge"  # Options: edge, azure, elevenlabs, google
+default_voice = "hi-IN-SwaraNeural"
+rate = "+10%"
+volume = 1.0
+
+[tts.azure]
+speech_key = ""
+speech_region = ""
+
+[tts.elevenlabs]
+api_key = ""
+
+[tts.google]
+credentials_path = ""
+
+[subtitle]
+provider = "edge"  # Options: edge, whisper
+enabled = false
+position = "bottom"  # Options: top, center, bottom
+mode = "sentence"  # Options: sentence, word
+
+[subtitle.whisper]
+model_size = "base"  # Options: tiny, base, small, medium, large, large-v3
+device = "cpu"  # Options: cpu, cuda
+compute_type = "int8"  # Options: int8, float16, float32
+
+[video]
+fps = 24
+bitrate = "2500k"
+preset = "ultrafast"  # Options: ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow
+aspect_ratio = "9:16"  # Options: 9:16, 16:9, 1:1
+transition = "fade"  # Options: none, fade, slide, zoom, dissolve
+
+[bgm]
+enabled = false
+type = "random"  # Options: random, custom, none
+volume = 0.2
+music_dir = "resource/songs"
+
+[materials]
+source = "local"  # Options: pexels, pixabay, local
+pexels_api_keys = []
+pixabay_api_keys = []
+
+[storage]
+scenes_dir = "scenes"
+audio_dir = "audio"
+videos_dir = "videos"
+cache_dir = ".cache"
+
+[api]
+host = "0.0.0.0"
+port = 8000
+
+[database]
+url = "postgresql+asyncpg://user:password@localhost:5432/youtube_agent"
+
+[redis]
+url = "redis://localhost:6379/0"
+cache_ttl = 86400  # 24 hours in seconds

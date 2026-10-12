@@ -1,10 +1,10 @@
 """
-Research Agent - Upgraded with caching and error handling
+Research Agent - Using Groq API
 """
 from typing import Dict
-import ollama
 from tenacity import retry, stop_after_attempt, wait_exponential
 import structlog
+from src.agents.llm_helper import generate_with_cache
 from src.cache import cache_manager
 from src.config import settings
 
@@ -17,76 +17,32 @@ logger = structlog.get_logger()
     reraise=True
 )
 async def research_topics(niche: str) -> Dict[str, any]:
-    """
-    Research trending topics in the given niche
-    Uses caching to avoid redundant LLM calls
-    """
+    """Research trending topics using Groq API"""
     logger.info("research_agent_started", niche=niche)
     
-    # Check cache first
-    cached_response = await cache_manager.get_llm_response(
-        model=settings.ollama_model,
-        prompt=f"research:{niche}"
-    )
-    
-    if cached_response:
-        logger.info("research_agent_cache_hit", niche=niche)
-        return {
-            "topics": cached_response.split("\n"),
-            "raw_response": cached_response
-        }
-    
-    prompt = f"""
-    You are a professional YouTube strategist.
-    Generate 10 high-CTR YouTube video ideas for the niche: {niche}
+    prompt = f"""Generate 10 trending YouTube video ideas for: {niche}
 
-    Requirements:
-    - Optimized for shorts
-    - Emotionally engaging
-    - Modern trends
-    - High click potential
-    - Beginner audience
+Requirements:
+- Optimized for YouTube Shorts
+- Emotionally engaging
+- Modern trends
+- High click potential
 
-    Also include:
-    - Estimated virality score out of 10
-    
-    Format each topic on a new line.
-    """
+Format: One idea per line."""
     
     try:
-        response = ollama.chat(
-            model=settings.ollama_model,
-            messages=[
-                {
-                    'role': 'user',
-                    'content': prompt
-                }
-            ]
+        response = await generate_with_cache(
+            prompt=prompt,
+            cache_key=f"research:{niche}"
         )
         
-        content = response['message']['content'].strip()
+        topics = [line.strip() for line in response.split("\n") if line.strip()]
         
-        # Cache the response for 24 hours
-        await cache_manager.set_llm_response(
-            model=settings.ollama_model,
-            prompt=f"research:{niche}",
-            response=content,
-            ttl=86400
-        )
-        
-        topics = [line.strip() for line in content.split("\n") if line.strip()]
-        
-        logger.info(
-            "research_agent_completed",
-            niche=niche,
-            topics_count=len(topics)
-        )
-        
-        await cache_manager.increment_metric("research_agent_calls")
+        logger.info("research_agent_completed", niche=niche, topics_count=len(topics))
         
         return {
             "topics": topics,
-            "raw_response": content
+            "raw_response": response
         }
         
     except Exception as e:
@@ -99,8 +55,6 @@ def research_agent_node(state: Dict) -> Dict:
     import asyncio
     
     niche = state.get("niche")
-    
-    # Run async function in sync context
     result = asyncio.run(research_topics(niche))
     
     topics = result["topics"]

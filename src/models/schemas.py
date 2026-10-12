@@ -1,10 +1,12 @@
 """
 Pydantic models for data validation and serialization
+Enhanced with comprehensive video generation parameters
 """
 from datetime import datetime
 from enum import Enum
-from typing import Optional, List
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional, List, Dict, Any
+from dataclasses import dataclass
+from pydantic import BaseModel, Field, ConfigDict, validator
 
 
 class VideoStatus(str, Enum):
@@ -15,17 +17,122 @@ class VideoStatus(str, Enum):
     GENERATING_SHOTS = "generating_shots"
     GENERATING_IMAGES = "generating_images"
     GENERATING_VOICE = "generating_voice"
+    GENERATING_SUBTITLES = "generating_subtitles"  # NEW
     CREATING_VIDEO = "creating_video"
+    ADDING_BGM = "adding_bgm"  # NEW
     GENERATING_SEO = "generating_seo"
     UPLOADING = "uploading"
     COMPLETED = "completed"
     FAILED = "failed"
 
 
+class VideoAspectRatio(str, Enum):
+    """Supported video aspect ratios"""
+    VERTICAL = "9:16"      # TikTok, YouTube Shorts
+    HORIZONTAL = "16:9"    # YouTube, landscape
+    SQUARE = "1:1"         # Instagram
+
+
+class VideoTransition(str, Enum):
+    """Video transition effects"""
+    NONE = "none"
+    FADE = "fade"
+    SLIDE = "slide"
+    ZOOM = "zoom"
+    DISSOLVE = "dissolve"
+
+
+class TTSProvider(str, Enum):
+    """Text-to-Speech providers"""
+    EDGE = "edge"           # Free, default
+    AZURE = "azure"         # Enterprise
+    ELEVENLABS = "elevenlabs"  # Premium quality
+    GOOGLE = "google"       # Good quality
+
+
+class SubtitleProvider(str, Enum):
+    """Subtitle generation providers"""
+    EDGE = "edge"           # Fast, uses TTS timestamps
+    WHISPER = "whisper"     # Accurate, uses transcription
+
+
+class VideoSource(str, Enum):
+    """Video material sources"""
+    PEXELS = "pexels"
+    PIXABAY = "pixabay"
+    LOCAL = "local"
+
+
+@dataclass
+class MaterialInfo:
+    """Information about generated material (image/video)"""
+    provider: str
+    url: str
+    duration: float
+    type: str  # "image" or "video"
+    metadata: Optional[Dict[str, Any]] = None
+
+
+class VideoParams(BaseModel):
+    """Complete video generation parameters - MoneyPrinterTurbo inspired"""
+    
+    # Script Settings
+    video_subject: str = Field(..., min_length=1, max_length=200, description="Video topic/subject")
+    video_script: Optional[str] = Field(None, description="Custom script (optional)")
+    video_language: str = Field(default="hi", description="Video language code")
+    paragraph_number: int = Field(default=6, ge=3, le=12, description="Number of scenes/shots")
+    
+    # Video Settings
+    video_aspect: VideoAspectRatio = Field(default=VideoAspectRatio.VERTICAL, description="Video aspect ratio")
+    video_concat_mode: str = Field(default="random", description="Scene concatenation mode")
+    video_clip_duration: int = Field(default=5, ge=3, le=10, description="Duration per clip in seconds")
+    video_clip_speed: float = Field(default=1.0, ge=0.5, le=2.0, description="Video playback speed")
+    video_transition: VideoTransition = Field(default=VideoTransition.FADE, description="Transition effect")
+    
+    # Voice/TTS Settings
+    voice_provider: TTSProvider = Field(default=TTSProvider.EDGE, description="TTS provider")
+    voice_name: str = Field(default="hi-IN-SwaraNeural", description="Voice model name")
+    voice_volume: float = Field(default=1.0, ge=0.0, le=2.0, description="Voice volume multiplier")
+    voice_rate: str = Field(default="+10%", description="Voice speed rate")
+    
+    # Subtitle Settings
+    subtitle_enabled: bool = Field(default=False, description="Enable subtitles")
+    subtitle_provider: SubtitleProvider = Field(default=SubtitleProvider.EDGE, description="Subtitle provider")
+    subtitle_position: str = Field(default="bottom", description="Subtitle position")
+    font_name: str = Field(default="Arial", description="Subtitle font")
+    font_size: int = Field(default=60, ge=20, le=120, description="Subtitle font size")
+    text_color: str = Field(default="#FFFFFF", description="Subtitle text color")
+    stroke_color: str = Field(default="#000000", description="Subtitle stroke color")
+    stroke_width: float = Field(default=1.5, ge=0.0, le=5.0, description="Subtitle stroke width")
+    
+    # Background Music
+    bgm_enabled: bool = Field(default=False, description="Enable background music")
+    bgm_type: str = Field(default="random", description="BGM selection type")
+    bgm_file: Optional[str] = Field(None, description="Custom BGM file path")
+    bgm_volume: float = Field(default=0.2, ge=0.0, le=1.0, description="BGM volume (0-1)")
+    
+    # Material Settings
+    video_source: VideoSource = Field(default=VideoSource.LOCAL, description="Video/image source")
+    
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "video_subject": "motivation",
+            "paragraph_number": 6,
+            "video_aspect": "9:16",
+            "voice_provider": "edge",
+            "subtitle_enabled": False,
+            "bgm_enabled": False
+        }
+    })
+
+
 class VideoRequest(BaseModel):
-    """Request to create a video"""
+    """Simplified request to create a video (backward compatible)"""
     niche: str = Field(..., min_length=1, max_length=200, description="Video niche/topic")
     num_images: int = Field(default=6, ge=3, le=12, description="Number of images to generate")
+    
+    # Optional advanced parameters
+    params: Optional[VideoParams] = Field(None, description="Advanced video parameters")
     
     model_config = ConfigDict(json_schema_extra={
         "example": {

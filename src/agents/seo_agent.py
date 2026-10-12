@@ -1,13 +1,11 @@
 """
-SEO Agent - Upgraded with structured output and caching
+SEO Agent - Using Groq API
 """
 from typing import Dict, List, Optional
 from pydantic import BaseModel
-import ollama
 from tenacity import retry, stop_after_attempt, wait_exponential
 import structlog
-from src.cache import cache_manager
-from src.config import settings
+from src.agents.llm_helper import generate_with_cache
 
 logger = structlog.get_logger()
 
@@ -85,73 +83,45 @@ async def generate_seo(topic: str, script: str) -> SEOMetadata:
     """
     logger.info("seo_agent_started", topic=topic)
     
-    # Check cache
-    cache_key = f"seo:{topic}"
-    cached_response = await cache_manager.get_llm_response(
-        model=settings.ollama_model,
-        prompt=cache_key
-    )
-    
-    if cached_response:
-        logger.info("seo_agent_cache_hit")
-        return parse_seo_response(cached_response)
-    
-    prompt = f"""
-    You are a professional YouTube SEO expert.
+    prompt = f"""You are a professional YouTube SEO expert.
 
-    Generate SEO metadata for this YouTube Shorts video.
+Generate SEO metadata for this YouTube Shorts video.
 
-    Topic:
-    {topic}
+Topic:
+{topic}
 
-    Script Preview:
-    {script[:300]}...
+Script Preview:
+{script[:300]}...
 
-    STRICT FORMAT:
+STRICT FORMAT:
 
-    TITLE:
-    (one viral clickable title only, max 100 characters)
+TITLE:
+(one viral clickable title only, max 100 characters)
 
-    DESCRIPTION:
-    (2 short engaging lines)
+DESCRIPTION:
+(2 short engaging lines)
 
-    HASHTAGS:
-    (10 hashtags in one line, each starting with #)
+HASHTAGS:
+(10 hashtags in one line, each starting with #)
 
-    TAGS:
-    (10 comma-separated SEO tags)
+TAGS:
+(10 comma-separated SEO tags)
 
-    Rules:
-    - No explanations
-    - No extra text
-    - No markdown
-    - No numbering
-    - Keep title short and viral
-    - Make it clickable and engaging
-    """
+Rules:
+- No explanations
+- No extra text
+- No markdown
+- No numbering
+- Keep title short and viral
+- Make it clickable and engaging"""
     
     try:
-        response = ollama.chat(
-            model=settings.ollama_model,
-            messages=[
-                {
-                    'role': 'user',
-                    'content': prompt
-                }
-            ]
+        response = await generate_with_cache(
+            prompt=prompt,
+            cache_key=f"seo:{topic}"
         )
         
-        content = response['message']['content'].strip()
-        
-        # Cache for 24 hours
-        await cache_manager.set_llm_response(
-            model=settings.ollama_model,
-            prompt=cache_key,
-            response=content,
-            ttl=86400
-        )
-        
-        seo_data = parse_seo_response(content)
+        seo_data = parse_seo_response(response)
         
         logger.info(
             "seo_agent_completed",
@@ -159,8 +129,6 @@ async def generate_seo(topic: str, script: str) -> SEOMetadata:
             tags_count=len(seo_data.tags),
             hashtags_count=len(seo_data.hashtags)
         )
-        
-        await cache_manager.increment_metric("seo_agent_calls")
         
         return seo_data
         

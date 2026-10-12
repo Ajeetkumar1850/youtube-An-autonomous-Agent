@@ -16,6 +16,7 @@ class CacheManager:
     
     def __init__(self):
         self.redis_client: Optional[redis.Redis] = None
+        self.in_memory_cache = {}  # Fallback when Redis unavailable
     
     async def connect(self):
         """Connect to Redis"""
@@ -28,8 +29,8 @@ class CacheManager:
             await self.redis_client.ping()
             logger.info("redis_connected", url=settings.redis_url)
         except Exception as e:
-            logger.error("redis_connection_failed", error=str(e))
-            raise
+            logger.warning("redis_unavailable_using_memory_cache", error=str(e))
+            self.redis_client = None
     
     async def disconnect(self):
         """Disconnect from Redis"""
@@ -47,10 +48,17 @@ class CacheManager:
     async def get(self, key: str) -> Optional[Any]:
         """Get value from cache"""
         try:
-            value = await self.redis_client.get(key)
-            if value:
-                logger.debug("cache_hit", key=key)
-                return json.loads(value)
+            if self.redis_client:
+                value = await self.redis_client.get(key)
+                if value:
+                    logger.debug("cache_hit", key=key)
+                    return json.loads(value)
+            else:
+                # Use in-memory cache
+                if key in self.in_memory_cache:
+                    logger.debug("memory_cache_hit", key=key)
+                    return self.in_memory_cache[key]
+            
             logger.debug("cache_miss", key=key)
             return None
         except Exception as e:
@@ -60,9 +68,14 @@ class CacheManager:
     async def set(self, key: str, value: Any, ttl: int = 3600):
         """Set value in cache with TTL (default 1 hour)"""
         try:
-            serialized = json.dumps(value)
-            await self.redis_client.setex(key, ttl, serialized)
-            logger.debug("cache_set", key=key, ttl=ttl)
+            if self.redis_client:
+                serialized = json.dumps(value)
+                await self.redis_client.setex(key, ttl, serialized)
+                logger.debug("cache_set", key=key, ttl=ttl)
+            else:
+                # Use in-memory cache (ignore TTL for simplicity)
+                self.in_memory_cache[key] = value
+                logger.debug("memory_cache_set", key=key)
         except Exception as e:
             logger.error("cache_set_error", key=key, error=str(e))
     
@@ -97,8 +110,14 @@ class CacheManager:
     async def increment_metric(self, metric_name: str) -> int:
         """Increment a metric counter"""
         try:
-            key = f"metric:{metric_name}"
-            return await self.redis_client.incr(key)
+            if self.redis_client:
+                key = f"metric:{metric_name}"
+                return await self.redis_client.incr(key)
+            else:
+                # In-memory fallback
+                key = f"metric:{metric_name}"
+                self.in_memory_cache[key] = self.in_memory_cache.get(key, 0) + 1
+                return self.in_memory_cache[key]
         except Exception as e:
             logger.error("metric_increment_error", metric=metric_name, error=str(e))
             return 0
@@ -106,9 +125,14 @@ class CacheManager:
     async def get_metric(self, metric_name: str) -> int:
         """Get metric value"""
         try:
-            key = f"metric:{metric_name}"
-            value = await self.redis_client.get(key)
-            return int(value) if value else 0
+            if self.redis_client:
+                key = f"metric:{metric_name}"
+                value = await self.redis_client.get(key)
+                return int(value) if value else 0
+            else:
+                # In-memory fallback
+                key = f"metric:{metric_name}"
+                return self.in_memory_cache.get(key, 0)
         except Exception as e:
             logger.error("metric_get_error", metric=metric_name, error=str(e))
             return 0
