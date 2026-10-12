@@ -13,6 +13,10 @@ config/secrets.py
 oauth_token.json
 api_keys.json
 
+# Interview & Resume Materials (keep private)
+interview/
+RESUME_POINTS.md
+
 # Python
 __pycache__/
 *.py[cod]
