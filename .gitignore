@@ -14,8 +14,10 @@ oauth_token.json
 api_keys.json
 
 # Interview & Resume Materials (keep private)
-interview/
 RESUME_POINTS.md
+
+# Archived/unused files
+archived_files/
 
 # Python
 __pycache__/
@@ -77,10 +79,10 @@ assets/*.jpg
 Thumbs.db
 *.log
 
-# Old version (keep for reference but don't track changes)
-agents/
-main.py
-README.md
+# Old version kept for reference
+# agents/ - keeping this as it's the main implementation
+# main.py - keeping this as it's the entry point
+# README.md - keeping documentation
 
 # Test outputs
 test_*.png
